@@ -3,8 +3,8 @@ node_modules
 .pnp
 .pnp.js
 
-# Build outputs
-dist
+# Build outputs (keep dist for Gitee Pages)
+# dist
 dist-ssr
 build
 
