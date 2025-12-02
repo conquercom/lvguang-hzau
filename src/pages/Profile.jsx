@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
   ArrowLeft, User, Star, Shield, Award, TrendingUp, 
@@ -29,6 +29,49 @@ const statsData = [
 function Profile({ user, onLogout }) {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('stats')
+  const [userAvatar, setUserAvatar] = useState(user?.avatar || null)
+
+  // 组件初始化时从localStorage加载头像
+  useEffect(() => {
+    const savedAvatar = localStorage.getItem('userAvatar')
+    if (savedAvatar) {
+      setUserAvatar(savedAvatar)
+    }
+  }, [])
+
+  // 头像上传处理
+  const handleAvatarUpload = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+      // 检查文件大小 (限制5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('图片大小不能超过5MB')
+        return
+      }
+      
+      // 检查文件类型
+      if (!file.type.startsWith('image/')) {
+        alert('请选择图片文件')
+        return
+      }
+
+      // 读取文件并转换为base64
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const avatarUrl = e.target.result
+        setUserAvatar(avatarUrl)
+        
+        // 保存到localStorage
+        localStorage.setItem('userAvatar', avatarUrl)
+        
+        // 如果有用户更新函数，也可以更新用户信息
+        if (typeof onUpdateUser === 'function') {
+          onUpdateUser({ ...user, avatar: avatarUrl })
+        }
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   const menuItems = [
     { icon: Gift, label: '我的奖励', desc: '查看已兑换的奖励', path: '/rewards' },
@@ -59,13 +102,24 @@ function Profile({ user, onLogout }) {
             {/* 头像 */}
             <div className="relative">
               <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center overflow-hidden border-3 border-white/50">
-                {user?.avatar ? (
-                  <img src={user.avatar} alt="" className="w-full h-full object-cover" />
+                {userAvatar ? (
+                  <img src={userAvatar} alt="用户头像" className="w-full h-full object-cover" />
                 ) : (
                   <User className="w-10 h-10 text-white" />
                 )}
               </div>
-              <button className="absolute bottom-0 right-0 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow">
+              <input
+                type="file"
+                id="avatar-upload"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="hidden"
+              />
+              <button 
+                onClick={() => document.getElementById('avatar-upload').click()}
+                className="absolute bottom-0 right-0 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow hover:bg-green-50 transition-colors"
+                title="更换头像"
+              >
                 <Camera className="w-4 h-4 text-green-primary" />
               </button>
             </div>

@@ -6,7 +6,16 @@ function Navbar({ user, onLogout }) {
   const navigate = useNavigate()
   const [showDropdown, setShowDropdown] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [userAvatar, setUserAvatar] = useState(user?.avatar || null)
   const dropdownRef = useRef(null)
+
+  // 加载保存的头像
+  useEffect(() => {
+    const savedAvatar = localStorage.getItem('userAvatar')
+    if (savedAvatar) {
+      setUserAvatar(savedAvatar)
+    }
+  }, [])
 
   // 点击外部关闭下拉菜单
   useEffect(() => {
@@ -86,8 +95,8 @@ function Navbar({ user, onLogout }) {
             >
               <div className="w-9 h-9 rounded-full bg-green-light border-2 border-green-primary 
                 flex items-center justify-center overflow-hidden">
-                {user?.avatar ? (
-                  <img src={user.avatar} alt="" className="w-full h-full object-cover" />
+                {userAvatar ? (
+                  <img src={userAvatar} alt="用户头像" className="w-full h-full object-cover" />
                 ) : (
                   <User className="w-5 h-5 text-green-primary" />
                 )}
